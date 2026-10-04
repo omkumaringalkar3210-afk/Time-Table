@@ -31,6 +31,7 @@ const DAYS = [
   { num: 4, code: 'THU', label: 'Thursday' },
   { num: 5, code: 'FRI', label: 'Friday' },
   { num: 6, code: 'SAT', label: 'Saturday' },
+  { num: 0, code: 'SUN', label: 'Sunday' },
 ];
 
 export default function TimetableDashboardScreen() {
@@ -38,9 +39,7 @@ export default function TimetableDashboardScreen() {
 
   const [user, setUser] = useState<UserAccount | null>(null);
   const [selectedDay, setSelectedDay] = useState<number>(() => {
-    const currentDay = new Date().getDay();
-    // Sunday (0) maps to Monday (1)
-    return currentDay === 0 ? 1 : currentDay;
+    return new Date().getDay();
   });
 
   const [lectures, setLectures] = useState<TimetableEntry[]>([]);
@@ -113,7 +112,7 @@ export default function TimetableDashboardScreen() {
     return 'GOOD EVENING';
   };
 
-  const isTodaySelected = selectedDay === (currentTime.getDay() === 0 ? 1 : currentTime.getDay());
+  const isTodaySelected = selectedDay === currentTime.getDay();
 
   // Count stats
   const totalClasses = lectures.length;
@@ -210,7 +209,7 @@ export default function TimetableDashboardScreen() {
             </View>
           </View>
 
-          {/* ── HORIZONTAL DAY SWITCHER (MON - SAT) ────────────────────── */}
+          {/* ── HORIZONTAL DAY SWITCHER (MON - SUN) ────────────────────── */}
           <View style={styles.daySelectorArea}>
             <Text style={styles.sectionHeading}>SELECT DAY</Text>
             <ScrollView
@@ -220,7 +219,7 @@ export default function TimetableDashboardScreen() {
             >
               {DAYS.map((d) => {
                 const isSelected = selectedDay === d.num;
-                const isToday = (currentTime.getDay() === 0 ? 1 : currentTime.getDay()) === d.num;
+                const isToday = currentTime.getDay() === d.num;
 
                 return (
                   <Pressable
@@ -260,11 +259,21 @@ export default function TimetableDashboardScreen() {
                 {DAYS.find((d) => d.num === selectedDay)?.label.toUpperCase()} SCHEDULE
               </Text>
               <Text style={styles.lectureCount}>
-                {lectures.length} {lectures.length === 1 ? 'class' : 'classes'}
+                {selectedDay === 0 ? 'Holiday' : `${lectures.length} ${lectures.length === 1 ? 'class' : 'classes'}`}
               </Text>
             </View>
 
-            {lectures.length === 0 ? (
+            {selectedDay === 0 ? (
+              <GlassCard style={styles.holidayCard}>
+                <View style={styles.holidayBadge}>
+                  <Ionicons name="sparkles" size={32} color="#FFD166" />
+                </View>
+                <Text style={styles.holidayTitle}>Sunday • Weekend Holiday 🎉</Text>
+                <Text style={styles.holidaySub}>
+                  No classes scheduled today. Take time to relax, recharge, and prepare for the upcoming week!
+                </Text>
+              </GlassCard>
+            ) : lectures.length === 0 ? (
               <GlassCard style={styles.emptyCard}>
                 <Ionicons name="sunny-outline" size={44} color={GlassColors.cyan} style={{ marginBottom: 12 }} />
                 <Text style={styles.emptyTitle}>No Classes Scheduled</Text>
@@ -518,6 +527,40 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: GlassColors.textMuted,
+  },
+  holidayCard: {
+    alignItems: 'center',
+    paddingVertical: 44,
+    paddingHorizontal: 20,
+    marginTop: 10,
+    width: '100%',
+    backgroundColor: 'rgba(255, 209, 102, 0.05)',
+    borderColor: 'rgba(255, 209, 102, 0.25)',
+  },
+  holidayBadge: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255, 209, 102, 0.15)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 209, 102, 0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  holidayTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#FFD166',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  holidaySub: {
+    fontSize: 13,
+    color: GlassColors.textMuted,
+    textAlign: 'center',
+    maxWidth: 290,
+    lineHeight: 20,
   },
   emptyCard: {
     alignItems: 'center',

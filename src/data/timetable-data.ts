@@ -4460,9 +4460,11 @@ export function getTodayLiveSchedule(
 ) {
   const now = new Date();
   const dayNum = now.getDay(); // 0=Sun, 1=Mon .. 6=Sat
-  const effectiveDay = dayNum === 0 ? 1 : dayNum;
+  if (dayNum === 0) {
+    return { ongoing: null, upcoming: [], ended: [] };
+  }
 
-  const dayData = getDaySchedule(branchId, divisionId, batchId, effectiveDay);
+  const dayData = getDaySchedule(branchId, divisionId, batchId, dayNum);
   if (!dayData) return { ongoing: null, upcoming: [], ended: [] };
 
   const lectures = dayData.slots.filter((s) => s.type !== 'break');
