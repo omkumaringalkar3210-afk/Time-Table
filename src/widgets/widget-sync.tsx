@@ -15,6 +15,23 @@ export interface WidgetScheduleData {
   isSunday: boolean;
 }
 
+/** Formats the current time as HH:MM AM/PM and a short date string */
+function getClockStrings(now: Date): { clockTime: string; clockDate: string } {
+  const hours24 = now.getHours();
+  const minutes = now.getMinutes();
+  const ampm = hours24 >= 12 ? 'PM' : 'AM';
+  const hours12 = hours24 % 12 || 12;
+  const mm = minutes.toString().padStart(2, '0');
+  const clockTime = `${hours12}:${mm} ${ampm}`;
+
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const dd = now.getDate().toString().padStart(2, '0');
+  const clockDate = `${days[now.getDay()]}, ${dd} ${months[now.getMonth()]}`;
+
+  return { clockTime, clockDate };
+}
+
 /**
  * Reads user preferences and calculates today's accurate live schedule
  */
@@ -81,6 +98,7 @@ export async function getWidgetScheduleData(): Promise<WidgetScheduleData> {
 export async function syncWidgets(): Promise<void> {
   try {
     const data = await getWidgetScheduleData();
+    const { clockTime, clockDate } = getClockStrings(new Date());
 
     await requestWidgetUpdate({
       widgetName: 'SmallTimetableWidget',
@@ -90,6 +108,8 @@ export async function syncWidgets(): Promise<void> {
           next={data.next}
           hasUser={Boolean(data.user)}
           isSunday={data.isSunday}
+          clockTime={clockTime}
+          clockDate={clockDate}
         />
       ),
     });
@@ -102,6 +122,8 @@ export async function syncWidgets(): Promise<void> {
           ongoingSlot={data.ongoing}
           hasUser={Boolean(data.user)}
           isSunday={data.isSunday}
+          clockTime={clockTime}
+          clockDate={clockDate}
         />
       ),
     });

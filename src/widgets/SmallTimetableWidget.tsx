@@ -7,6 +7,8 @@ interface SmallTimetableWidgetProps {
   next: TimetableEntry | null;
   hasUser: boolean;
   isSunday: boolean;
+  clockTime: string;  // e.g. "06:34 PM"
+  clockDate: string;  // e.g. "Mon, 05 Oct"
 }
 
 export function SmallTimetableWidget({
@@ -14,6 +16,8 @@ export function SmallTimetableWidget({
   next,
   hasUser,
   isSunday,
+  clockTime,
+  clockDate,
 }: SmallTimetableWidgetProps) {
   if (!hasUser) {
     return (
@@ -86,16 +90,30 @@ export function SmallTimetableWidget({
           padding: 16,
           justifyContent: 'center',
           alignItems: 'center',
+          flexDirection: 'column',
         }}
         clickAction="OPEN_APP"
       >
+        {/* Digital Clock */}
         <TextWidget
-          text="All classes completed today"
+          text={clockTime}
           style={{
-            fontSize: 14,
-            color: '#10B981',
+            fontSize: 36,
+            fontWeight: 'bold',
+            color: '#00E5FF',
             textAlign: 'center',
-            fontWeight: '600',
+            letterSpacing: 2,
+          }}
+        />
+        {/* Date */}
+        <TextWidget
+          text={clockDate}
+          style={{
+            fontSize: 13,
+            color: '#64748B',
+            textAlign: 'center',
+            marginTop: 4,
+            letterSpacing: 1,
           }}
         />
       </FlexWidget>

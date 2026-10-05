@@ -7,6 +7,8 @@ interface BigTimetableWidgetProps {
   ongoingSlot: TimetableEntry | null;
   hasUser: boolean;
   isSunday: boolean;
+  clockTime: string;
+  clockDate: string;
 }
 
 export function BigTimetableWidget({
@@ -14,6 +16,8 @@ export function BigTimetableWidget({
   ongoingSlot,
   hasUser,
   isSunday,
+  clockTime,
+  clockDate,
 }: BigTimetableWidgetProps) {
   if (!hasUser) {
     return (
@@ -57,18 +61,45 @@ export function BigTimetableWidget({
           padding: 20,
           justifyContent: 'center',
           alignItems: 'center',
+          flexDirection: 'column',
         }}
         clickAction="OPEN_APP"
       >
+        {/* Digital Clock */}
         <TextWidget
-          text={isSunday ? 'Sunday • No Classes' : 'No classes scheduled today'}
+          text={clockTime}
           style={{
-            fontSize: 14,
-            color: '#94A3B8',
-            textAlign: 'center',
+            fontSize: 42,
             fontWeight: 'bold',
+            color: '#00E5FF',
+            textAlign: 'center',
+            letterSpacing: 2,
           }}
         />
+        {/* Date */}
+        <TextWidget
+          text={clockDate}
+          style={{
+            fontSize: 14,
+            color: '#64748B',
+            textAlign: 'center',
+            marginTop: 6,
+            letterSpacing: 1,
+          }}
+        />
+        {isSunday && (
+          <TextWidget
+            text="SUNDAY • NO CLASSES"
+            style={{
+              fontSize: 10,
+              color: '#334155',
+              textAlign: 'center',
+              marginTop: 10,
+              fontWeight: 'bold',
+              letterSpacing: 2,
+            }}
+          />
+        )}
       </FlexWidget>
     );
   }
