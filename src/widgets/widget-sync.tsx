@@ -16,7 +16,7 @@ export interface WidgetScheduleData {
 }
 
 /** Formats the current time as HH:MM AM/PM and a short date string */
-function getClockStrings(now: Date): { clockTime: string; clockDate: string } {
+function getClockStrings(now: Date): { clockTime: string; clockDate: string; dayName: string } {
   const hours24 = now.getHours();
   const minutes = now.getMinutes();
   const ampm = hours24 >= 12 ? 'PM' : 'AM';
@@ -25,11 +25,13 @@ function getClockStrings(now: Date): { clockTime: string; clockDate: string } {
   const clockTime = `${hours12}:${mm} ${ampm}`;
 
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const fullDays = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const dd = now.getDate().toString().padStart(2, '0');
   const clockDate = `${days[now.getDay()]}, ${dd} ${months[now.getMonth()]}`;
+  const dayName = fullDays[now.getDay()];
 
-  return { clockTime, clockDate };
+  return { clockTime, clockDate, dayName };
 }
 
 /**
@@ -98,7 +100,7 @@ export async function getWidgetScheduleData(): Promise<WidgetScheduleData> {
 export async function syncWidgets(): Promise<void> {
   try {
     const data = await getWidgetScheduleData();
-    const { clockTime, clockDate } = getClockStrings(new Date());
+    const { clockTime, clockDate, dayName } = getClockStrings(new Date());
 
     await requestWidgetUpdate({
       widgetName: 'SmallTimetableWidget',
@@ -124,6 +126,7 @@ export async function syncWidgets(): Promise<void> {
           isSunday={data.isSunday}
           clockTime={clockTime}
           clockDate={clockDate}
+          dayName={dayName}
         />
       ),
     });

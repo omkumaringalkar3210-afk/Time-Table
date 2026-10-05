@@ -4,7 +4,7 @@ import { getWidgetScheduleData } from './widget-sync';
 import { SmallTimetableWidget } from './SmallTimetableWidget';
 import { BigTimetableWidget } from './BigTimetableWidget';
 
-function getClockStrings(now: Date): { clockTime: string; clockDate: string } {
+function getClockStrings(now: Date): { clockTime: string; clockDate: string; dayName: string } {
   const hours24 = now.getHours();
   const minutes = now.getMinutes();
   const ampm = hours24 >= 12 ? 'PM' : 'AM';
@@ -13,11 +13,13 @@ function getClockStrings(now: Date): { clockTime: string; clockDate: string } {
   const clockTime = `${hours12}:${mm} ${ampm}`;
 
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const fullDays = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const dd = now.getDate().toString().padStart(2, '0');
   const clockDate = `${days[now.getDay()]}, ${dd} ${months[now.getMonth()]}`;
+  const dayName = fullDays[now.getDay()];
 
-  return { clockTime, clockDate };
+  return { clockTime, clockDate, dayName };
 }
 
 export async function widgetTaskHandler(props: WidgetTaskHandlerProps): Promise<void> {
@@ -28,7 +30,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps): Promise<
     case 'WIDGET_UPDATE':
     case 'WIDGET_RESIZED': {
       const data = await getWidgetScheduleData();
-      const { clockTime, clockDate } = getClockStrings(new Date());
+      const { clockTime, clockDate, dayName } = getClockStrings(new Date());
 
       if (widgetInfo.widgetName === 'SmallTimetableWidget') {
         renderWidget(
@@ -50,6 +52,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps): Promise<
             isSunday={data.isSunday}
             clockTime={clockTime}
             clockDate={clockDate}
+            dayName={dayName}
           />
         );
       }
@@ -57,11 +60,9 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps): Promise<
     }
 
     case 'WIDGET_DELETED':
-      // No cleanup needed
       break;
 
     case 'WIDGET_CLICK':
-      // The default clickAction 'OPEN_APP' handles opening the app automatically
       break;
 
     default:

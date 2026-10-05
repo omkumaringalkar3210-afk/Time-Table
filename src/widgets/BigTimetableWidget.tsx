@@ -9,6 +9,7 @@ interface BigTimetableWidgetProps {
   isSunday: boolean;
   clockTime: string;
   clockDate: string;
+  dayName: string; // e.g. "MONDAY"
 }
 
 export function BigTimetableWidget({
@@ -18,6 +19,7 @@ export function BigTimetableWidget({
   isSunday,
   clockTime,
   clockDate,
+  dayName,
 }: BigTimetableWidgetProps) {
   if (!hasUser) {
     return (
@@ -122,6 +124,38 @@ export function BigTimetableWidget({
       }}
       clickAction="OPEN_APP"
     >
+      {/* Day header */}
+      <FlexWidget
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingHorizontal: 4,
+          paddingBottom: 6,
+          marginBottom: 2,
+          borderBottomWidth: 1,
+          borderBottomColor: '#00E5FF22',
+        }}
+      >
+        <TextWidget
+          text={dayName}
+          style={{
+            fontSize: 11,
+            fontWeight: 'bold',
+            color: '#00E5FF',
+            letterSpacing: 2,
+          }}
+        />
+        <TextWidget
+          text={clockDate}
+          style={{
+            fontSize: 10,
+            color: '#334155',
+            letterSpacing: 1,
+          }}
+        />
+      </FlexWidget>
+
       {displaySlots.map((slot, index) => {
         const isOngoing =
           ongoingSlot &&
