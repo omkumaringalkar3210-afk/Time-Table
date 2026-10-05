@@ -31,10 +31,44 @@
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "SmallTimetableWidget",
+              "label": "Timetable (Next Class)",
+              "minWidth": "160dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "updatePeriodMillis": 1800000,
+              "description": "Ongoing and next class"
+            },
+            {
+              "name": "BigTimetableWidget",
+              "label": "Timetable (Full Day)",
+              "minWidth": "270dp",
+              "minHeight": "180dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 3,
+              "updatePeriodMillis": 1800000,
+              "description": "Today's complete class schedule"
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6ac518f1-e42f-4fa5-abf4-f375f54defa9"
+      }
+    },
+    "owner": "omkumar_1234"
   }
 }

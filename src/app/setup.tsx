@@ -29,6 +29,7 @@ import {
   UserAccount,
 } from '@/storage/preferences-storage';
 import { GlassColors } from '@/theme/glass-theme';
+import { syncWidgets } from '@/widgets/widget-sync';
 
 export default function SetupAndAuthScreen() {
   const router = useRouter();
@@ -135,6 +136,9 @@ export default function SetupAndAuthScreen() {
       return;
     }
 
+    // Sync widgets with new user info!
+    syncWidgets();
+
     // Go directly to timetable!
     router.replace('/timetable');
   };
@@ -158,6 +162,9 @@ export default function SetupAndAuthScreen() {
       setErrorMessage(result.error || 'Login failed');
       return;
     }
+
+    // Sync widgets with user info!
+    syncWidgets();
 
     // Go directly to timetable!
     router.replace('/timetable');

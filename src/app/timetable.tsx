@@ -23,6 +23,7 @@ import {
 } from '@/storage/preferences-storage';
 import { TimetableEntry } from '@/data/timetable-data';
 import { GlassColors } from '@/theme/glass-theme';
+import { syncWidgets } from '@/widgets/widget-sync';
 
 const DAYS = [
   { num: 1, code: 'MON', label: 'Monday' },
@@ -48,9 +49,12 @@ export default function TimetableDashboardScreen() {
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // Real-time clock tick every 30s to update LIVE NOW badges
+  // Real-time clock tick every 30s to update LIVE NOW badges & widgets
   useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(new Date()), 30000);
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+      syncWidgets();
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -63,6 +67,7 @@ export default function TimetableDashboardScreen() {
         return;
       }
       setUser(stored);
+      syncWidgets();
 
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -88,6 +93,7 @@ export default function TimetableDashboardScreen() {
   const onRefresh = async () => {
     setRefreshing(true);
     setCurrentTime(new Date());
+    syncWidgets();
     if (user) {
       const slots = TimetableService.getDayLectures(
         user.branchId,
