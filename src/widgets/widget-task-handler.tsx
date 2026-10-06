@@ -3,6 +3,7 @@ import type { WidgetTaskHandlerProps } from 'react-native-android-widget';
 import { getWidgetScheduleData } from './widget-sync';
 import { SmallTimetableWidget } from './SmallTimetableWidget';
 import { BigTimetableWidget } from './BigTimetableWidget';
+import { MiniGridTimetableWidget } from './MiniGridTimetableWidget';
 
 function getClockStrings(now: Date): { clockTime: string; clockDate: string; dayName: string } {
   const hours24 = now.getHours();
@@ -46,6 +47,18 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps): Promise<
       } else if (widgetInfo.widgetName === 'BigTimetableWidget') {
         renderWidget(
           <BigTimetableWidget
+            slots={data.slots}
+            ongoingSlot={data.ongoing}
+            hasUser={Boolean(data.user)}
+            isSunday={data.isSunday}
+            clockTime={clockTime}
+            clockDate={clockDate}
+            dayName={dayName}
+          />
+        );
+      } else if (widgetInfo.widgetName === 'MiniGridTimetableWidget') {
+        renderWidget(
+          <MiniGridTimetableWidget
             slots={data.slots}
             ongoingSlot={data.ongoing}
             hasUser={Boolean(data.user)}

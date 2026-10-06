@@ -6,6 +6,7 @@ import { TimetableService } from '@/services/timetable-service';
 import { TimetableEntry, getSlotStatus } from '@/data/timetable-data';
 import { SmallTimetableWidget } from './SmallTimetableWidget';
 import { BigTimetableWidget } from './BigTimetableWidget';
+import { MiniGridTimetableWidget } from './MiniGridTimetableWidget';
 
 export interface WidgetScheduleData {
   user: UserAccount | null;
@@ -120,6 +121,21 @@ export async function syncWidgets(): Promise<void> {
       widgetName: 'BigTimetableWidget',
       renderWidget: () => (
         <BigTimetableWidget
+          slots={data.slots}
+          ongoingSlot={data.ongoing}
+          hasUser={Boolean(data.user)}
+          isSunday={data.isSunday}
+          clockTime={clockTime}
+          clockDate={clockDate}
+          dayName={dayName}
+        />
+      ),
+    });
+
+    await requestWidgetUpdate({
+      widgetName: 'MiniGridTimetableWidget',
+      renderWidget: () => (
+        <MiniGridTimetableWidget
           slots={data.slots}
           ongoingSlot={data.ongoing}
           hasUser={Boolean(data.user)}

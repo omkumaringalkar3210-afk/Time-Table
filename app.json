@@ -55,6 +55,16 @@
               "targetCellHeight": 3,
               "updatePeriodMillis": 1800000,
               "description": "Today's complete class schedule"
+            },
+            {
+              "name": "MiniGridTimetableWidget",
+              "label": "Timetable (Grid)",
+              "minWidth": "250dp",
+              "minHeight": "160dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 3,
+              "updatePeriodMillis": 1800000,
+              "description": "Today's classes in a compact 2-column grid"
             }
           ]
         }
