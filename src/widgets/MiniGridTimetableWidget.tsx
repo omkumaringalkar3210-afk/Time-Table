@@ -12,7 +12,7 @@ interface MiniGridTimetableWidgetProps {
   dayName: string; // e.g. "MONDAY"
 }
 
-/** A compact 2-column grid widget — smallest possible footprint */
+/** A compact 2-column grid widget matching the native XML card layout */
 export function MiniGridTimetableWidget({
   slots,
   ongoingSlot,
@@ -29,10 +29,8 @@ export function MiniGridTimetableWidget({
         style={{
           height: 'match_parent',
           width: 'match_parent',
-          backgroundColor: '#070B18',
+          backgroundColor: '#050A15',
           borderRadius: 16,
-          borderWidth: 1,
-          borderColor: '#1E293B',
           justifyContent: 'center',
           alignItems: 'center',
           padding: 10,
@@ -41,7 +39,7 @@ export function MiniGridTimetableWidget({
       >
         <TextWidget
           text="Open app to set your timetable"
-          style={{ fontSize: 11, color: '#38BDF8', textAlign: 'center', fontWeight: 'bold' }}
+          style={{ fontSize: 11, color: '#16D9F5', textAlign: 'center', fontWeight: 'bold' }}
         />
       </FlexWidget>
     );
@@ -54,10 +52,8 @@ export function MiniGridTimetableWidget({
         style={{
           height: 'match_parent',
           width: 'match_parent',
-          backgroundColor: '#070B18',
+          backgroundColor: '#050A15',
           borderRadius: 16,
-          borderWidth: 1,
-          borderColor: '#1E293B',
           justifyContent: 'center',
           alignItems: 'center',
           flexDirection: 'column',
@@ -67,19 +63,19 @@ export function MiniGridTimetableWidget({
       >
         <TextWidget
           text={clockTime}
-          style={{ fontSize: 28, fontWeight: 'bold', color: '#00E5FF', textAlign: 'center' }}
+          style={{ fontSize: 28, fontWeight: 'bold', color: '#16D9F5', textAlign: 'center' }}
         />
         <TextWidget
           text={isSunday ? 'SUNDAY • NO CLASSES' : clockDate}
-          style={{ fontSize: 9, color: '#475569', textAlign: 'center', marginTop: 4, letterSpacing: 1 }}
+          style={{ fontSize: 9, color: '#56657A', textAlign: 'center', marginTop: 4, letterSpacing: 1 }}
         />
       </FlexWidget>
     );
   }
 
   /* ── Grid layout ───────────────────────────────────────────────── */
-  // Limit to 6 slots max so it fits in the smallest practical widget size
-  const displaySlots = slots.slice(0, 6);
+  // Limit to 6 slots max (3 rows × 2 columns)
+  const displaySlots = slots.filter((s) => s.type !== 'break').slice(0, 6);
 
   // Split into rows of 2
   const rows: TimetableEntry[][] = [];
@@ -92,47 +88,62 @@ export function MiniGridTimetableWidget({
       style={{
         height: 'match_parent',
         width: 'match_parent',
-        backgroundColor: '#070B18',
+        backgroundColor: '#050A15',
         borderRadius: 16,
-        borderWidth: 1,
-        borderColor: '#00E5FF22',
-        padding: 6,
+        padding: 0,
         flexDirection: 'column',
-        justifyContent: 'space-between',
       }}
       clickAction="OPEN_APP"
     >
-      {/* ── Compact header: day + time ── */}
+      {/* ── HEADER: Day name + live time ── */}
       <FlexWidget
         style={{
           flexDirection: 'row',
-          justifyContent: 'space-between',
           alignItems: 'center',
-          paddingHorizontal: 2,
-          paddingBottom: 4,
-          marginBottom: 2,
-          borderBottomWidth: 1,
-          borderBottomColor: '#00E5FF18',
+          paddingHorizontal: 12,
+          height: 48,
         }}
       >
         <TextWidget
           text={dayName}
-          style={{ fontSize: 9, fontWeight: 'bold', color: '#00E5FF', letterSpacing: 1.5 }}
+          style={{
+            fontSize: 16,
+            fontWeight: 'bold',
+            color: '#16D9F5',
+            letterSpacing: 1.5,
+          }}
         />
         <TextWidget
           text={clockTime}
-          style={{ fontSize: 9, color: '#334155', letterSpacing: 0.5 }}
+          style={{
+            fontSize: 16,
+            color: '#56657A',
+            marginLeft: 5,
+          }}
         />
       </FlexWidget>
 
+      {/* ── HEADER LINE ── */}
+      <FlexWidget
+        style={{
+          width: 340,
+          height: 1,
+          backgroundColor: '#153345',
+          marginLeft: 12,
+        }}
+      />
+
+      {/* ── SPACER ── */}
+      <FlexWidget style={{ height: 12 }} />
+
+      {/* ── CARD GRID (3 rows × 2 cols) ── */}
       {rows.map((row, rowIndex) => (
         <FlexWidget
           key={`row-${rowIndex}`}
           style={{
             flexDirection: 'row',
-            justifyContent: 'space-between',
             flex: 1,
-            marginBottom: rowIndex < rows.length - 1 ? 4 : 0,
+            marginBottom: rowIndex < rows.length - 1 ? 0 : 0,
           }}
         >
           {row.map((slot, colIndex) => {
@@ -143,22 +154,31 @@ export function MiniGridTimetableWidget({
 
             const isLab = slot.type === 'lab';
 
+            // Type badge text
+            const typeText = isLab ? 'LAB' : 'LEC';
+            // Type badge color: green for LAB, cyan for LEC
+            const typeColor = isLab ? '#39D98A' : '#19BFEF';
+            // Subject color: cyan if ongoing, white otherwise
+            const subjectColor = isOngoing ? '#19D9F5' : '#FFFFFF';
+            // Time color: highlighted if ongoing, dim otherwise
+            const timeColor = isOngoing ? '#71BBD4' : '#718099';
+
             return (
               <FlexWidget
                 key={`slot-${rowIndex}-${colIndex}`}
                 style={{
                   flex: 1,
                   flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  backgroundColor: isOngoing ? '#0D1F3A' : '#0B1128',
-                  borderRadius: 10,
-                  padding: 7,
-                  marginLeft: colIndex > 0 ? 4 : 0,
+                  justifyContent: 'flex-start',
+                  backgroundColor: isOngoing ? '#0A1A2E' : '#0A0F1E',
+                  borderRadius: 12,
+                  padding: 12,
+                  marginLeft: colIndex > 0 ? 0 : 0,
                   borderWidth: 1,
-                  borderColor: isOngoing ? '#00E5FF' : '#1E2D45',
+                  borderColor: isOngoing ? '#16D9F544' : '#111827',
                 }}
               >
-                {/* Subject + Type badge */}
+                {/* Top row: Subject name + Type badge */}
                 <FlexWidget
                   style={{
                     flexDirection: 'row',
@@ -170,28 +190,28 @@ export function MiniGridTimetableWidget({
                   <TextWidget
                     text={slot.subject}
                     style={{
-                      fontSize: 13,
+                      fontSize: 17,
                       fontWeight: 'bold',
-                      color: isOngoing ? '#00E5FF' : '#FFFFFF',
+                      color: subjectColor,
                     }}
                   />
                   <TextWidget
-                    text={isLab ? 'LAB' : 'LEC'}
+                    text={typeText}
                     style={{
-                      fontSize: 8,
+                      fontSize: 12,
                       fontWeight: 'bold',
-                      color: isLab ? '#10B981' : '#38BDF8',
+                      color: typeColor,
                     }}
                   />
                 </FlexWidget>
 
-                {/* Time range */}
+                {/* Start time */}
                 <TextWidget
-                  text={`${slot.startTime} – ${slot.endTime}`}
+                  text={slot.startTime}
                   style={{
-                    fontSize: 9,
-                    color: isOngoing ? '#7DD3FC' : '#475569',
-                    marginTop: 3,
+                    fontSize: 13,
+                    color: timeColor,
+                    marginTop: 6,
                   }}
                 />
               </FlexWidget>
@@ -202,7 +222,7 @@ export function MiniGridTimetableWidget({
           {row.length === 1 && (
             <FlexWidget
               key={`empty-${rowIndex}`}
-              style={{ flex: 1, marginLeft: 4 }}
+              style={{ flex: 1 }}
             />
           )}
         </FlexWidget>
