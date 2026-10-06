@@ -79,6 +79,12 @@
         "projectId": "6ac518f1-e42f-4fa5-abf4-f375f54defa9"
       }
     },
-    "owner": "omkumar_1234"
+    "owner": "omkumar_1234",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/6ac518f1-e42f-4fa5-abf4-f375f54defa9"
+    }
   }
 }

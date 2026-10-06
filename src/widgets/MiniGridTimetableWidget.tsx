@@ -30,7 +30,7 @@ export function MiniGridTimetableWidget({
           height: 'match_parent',
           width: 'match_parent',
           backgroundColor: '#050A15',
-          borderRadius: 16,
+          borderRadius: 20,
           justifyContent: 'center',
           alignItems: 'center',
           padding: 10,
@@ -53,7 +53,7 @@ export function MiniGridTimetableWidget({
           height: 'match_parent',
           width: 'match_parent',
           backgroundColor: '#050A15',
-          borderRadius: 16,
+          borderRadius: 20,
           justifyContent: 'center',
           alignItems: 'center',
           flexDirection: 'column',
@@ -89,8 +89,9 @@ export function MiniGridTimetableWidget({
         height: 'match_parent',
         width: 'match_parent',
         backgroundColor: '#050A15',
-        borderRadius: 16,
-        padding: 0,
+        borderRadius: 20,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
         flexDirection: 'column',
       }}
       clickAction="OPEN_APP"
@@ -100,8 +101,8 @@ export function MiniGridTimetableWidget({
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          paddingHorizontal: 12,
-          height: 48,
+          width: 'match_parent',
+          height: 34,
         }}
       >
         <TextWidget
@@ -116,9 +117,9 @@ export function MiniGridTimetableWidget({
         <TextWidget
           text={clockTime}
           style={{
-            fontSize: 16,
+            fontSize: 15,
             color: '#56657A',
-            marginLeft: 5,
+            marginLeft: 8,
           }}
         />
       </FlexWidget>
@@ -126,15 +127,13 @@ export function MiniGridTimetableWidget({
       {/* ── HEADER LINE ── */}
       <FlexWidget
         style={{
-          width: 340,
+          width: 'match_parent',
           height: 1,
           backgroundColor: '#153345',
-          marginLeft: 12,
+          marginTop: 4,
+          marginBottom: 8,
         }}
       />
-
-      {/* ── SPACER ── */}
-      <FlexWidget style={{ height: 12 }} />
 
       {/* ── CARD GRID (3 rows × 2 cols) ── */}
       {rows.map((row, rowIndex) => (
@@ -142,8 +141,9 @@ export function MiniGridTimetableWidget({
           key={`row-${rowIndex}`}
           style={{
             flexDirection: 'row',
+            width: 'match_parent',
             flex: 1,
-            marginBottom: rowIndex < rows.length - 1 ? 0 : 0,
+            marginBottom: rowIndex < rows.length - 1 ? 6 : 0,
           }}
         >
           {row.map((slot, colIndex) => {
@@ -153,8 +153,16 @@ export function MiniGridTimetableWidget({
               ongoingSlot.subject === slot.subject;
 
             const isLab = slot.type === 'lab';
+            const isDoubt = slot.type === 'doubt' || slot.subject === 'Doubt Solving Session';
 
-            // Type badge text
+            // Clean subject name to prevent awkward line breaks in compact grid
+            const subjectName = isDoubt
+              ? 'DSS'
+              : slot.subject.length > 10
+                ? slot.subject.slice(0, 9) + '…'
+                : slot.subject;
+
+            // Type badge text: LAB, LEC, or LEC for doubt sessions
             const typeText = isLab ? 'LAB' : 'LEC';
             // Type badge color: green for LAB, cyan for LEC
             const typeColor = isLab ? '#39D98A' : '#19BFEF';
@@ -169,11 +177,13 @@ export function MiniGridTimetableWidget({
                 style={{
                   flex: 1,
                   flexDirection: 'column',
-                  justifyContent: 'flex-start',
+                  justifyContent: 'center',
                   backgroundColor: isOngoing ? '#0A1A2E' : '#0A0F1E',
                   borderRadius: 12,
-                  padding: 12,
-                  marginLeft: colIndex > 0 ? 0 : 0,
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                  marginLeft: colIndex > 0 ? 4 : 0,
+                  marginRight: colIndex === 0 ? 4 : 0,
                   borderWidth: 1,
                   borderColor: isOngoing ? '#16D9F544' : '#111827',
                 }}
@@ -188,9 +198,9 @@ export function MiniGridTimetableWidget({
                   }}
                 >
                   <TextWidget
-                    text={slot.subject}
+                    text={subjectName}
                     style={{
-                      fontSize: 17,
+                      fontSize: subjectName.length > 7 ? 14 : 16,
                       fontWeight: 'bold',
                       color: subjectColor,
                     }}
@@ -198,7 +208,7 @@ export function MiniGridTimetableWidget({
                   <TextWidget
                     text={typeText}
                     style={{
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: 'bold',
                       color: typeColor,
                     }}
@@ -209,9 +219,9 @@ export function MiniGridTimetableWidget({
                 <TextWidget
                   text={slot.startTime}
                   style={{
-                    fontSize: 13,
+                    fontSize: 12,
                     color: timeColor,
-                    marginTop: 6,
+                    marginTop: 4,
                   }}
                 />
               </FlexWidget>
@@ -222,7 +232,10 @@ export function MiniGridTimetableWidget({
           {row.length === 1 && (
             <FlexWidget
               key={`empty-${rowIndex}`}
-              style={{ flex: 1 }}
+              style={{
+                flex: 1,
+                marginLeft: 4,
+              }}
             />
           )}
         </FlexWidget>
