@@ -8,9 +8,14 @@ import {
   LayoutAnimation,
   UIManager,
   Animated,
+  Linking,
+  Alert,
 } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GlassColors } from '@/theme/glass-theme';
+
+const WHATSAPP_COMMUNITY_URL = 'https://chat.whatsapp.com/KGlte8ZxZ64JLy6yF2fmXN';
 
 if (
   Platform.OS === 'android' &&
@@ -66,6 +71,31 @@ export function Watermark() {
     };
   }, []);
 
+  const handleWhatsAppPress = () => {
+    NetInfo.fetch().then((state) => {
+      if (!state.isConnected) {
+        Alert.alert(
+          'No Internet',
+          'Please check your internet connection and try again.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+      Alert.alert(
+        'Join Our Community',
+        'For upcoming updates and features, join our WhatsApp community!',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Join Now',
+            onPress: () => Linking.openURL(WHATSAPP_COMMUNITY_URL),
+          },
+        ],
+        { cancelable: true }
+      );
+    });
+  };
+
   const bottomOffset = Platform.OS === 'web' ? 16 : Math.max(16, insets.bottom + 10);
 
   return (
@@ -90,9 +120,11 @@ export function Watermark() {
           <View style={[styles.glowDot, expanded && styles.glowDotExpanded]} />
           <Text style={styles.badgeText}>
             made by :{' '}
-            <Text style={[styles.badgeAuthor, expanded && styles.badgeAuthorExpanded]}>
-              {expanded ? 'omkumar ingalkar' : 'om'}
-            </Text>
+            <Pressable onPress={handleWhatsAppPress} hitSlop={8}>
+              <Text style={[styles.badgeAuthor, expanded && styles.badgeAuthorExpanded]}>
+                {expanded ? 'omkumar ingalkar' : 'om'}
+              </Text>
+            </Pressable>
           </Text>
         </Pressable>
       </Animated.View>
