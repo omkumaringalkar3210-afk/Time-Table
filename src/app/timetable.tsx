@@ -36,6 +36,10 @@ import {
   hasCustomOverrides,
   isSlotModified,
 } from '@/services/custom-timetable-service';
+import {
+  getTodayPendingCount,
+  haveAllClassesEnded,
+} from '@/services/attendance-service';
 
 const DAYS = [
   { num: 1, code: 'MON', label: 'Monday' },
@@ -65,6 +69,8 @@ export default function TimetableDashboardScreen() {
 
   const [refreshing, setRefreshing] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [pendingAttendance, setPendingAttendance] = useState(0);
+  const [classesEnded, setClassesEnded] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -77,6 +83,29 @@ export default function TimetableDashboardScreen() {
     setTimeout(() => {
       setFeedbackToast((cur) => (cur === msg ? null : cur));
     }, 3200);
+  };
+
+  const checkAttendance = async (currentUser: UserAccount | null) => {
+    if (!currentUser?.branchId || !currentUser?.divisionId || !currentUser?.subdivisionId) return;
+    try {
+      const pending = await getTodayPendingCount(
+        currentUser.branchId,
+        currentUser.divisionId,
+        currentUser.subdivisionId,
+        currentUser.username
+      );
+      setPendingAttendance(pending);
+
+      const ended = haveAllClassesEnded(
+        currentUser.branchId,
+        currentUser.divisionId,
+        currentUser.subdivisionId,
+        currentUser.username
+      );
+      setClassesEnded(ended);
+    } catch (e) {
+      // ignore
+    }
   };
 
   const refreshSchedule = (currentUser: UserAccount | null = user, currentDay: number = selectedDay) => {
@@ -103,6 +132,7 @@ export default function TimetableDashboardScreen() {
     setLectures(activeSlots);
     setDefaultLectures(baseSlots);
     setHasEdits(hasCustomOverrides(key));
+    checkAttendance(currentUser);
   };
 
   // Real-time clock tick every 30s to update LIVE NOW badges & widgets
@@ -243,6 +273,16 @@ export default function TimetableDashboardScreen() {
 
             <View style={styles.headerActions}>
               <Pressable
+                onPress={() => router.push('/attendance' as any)}
+                hitSlop={8}
+                style={({ pressed }) => [styles.attendanceBtn, pressed && { opacity: 0.75 }]}
+              >
+                <Ionicons name="pie-chart-outline" size={14} color={GlassColors.cyanBright} />
+                <Text style={styles.attendanceText}>ATTENDANCE</Text>
+                {pendingAttendance > 0 && <View style={styles.attendanceBadgeDot} />}
+              </Pressable>
+
+              <Pressable
                 onPress={handleLogout}
                 hitSlop={8}
                 style={({ pressed }) => [styles.logoutBtn, pressed && { opacity: 0.7 }]}
@@ -277,6 +317,30 @@ export default function TimetableDashboardScreen() {
               <Text style={styles.changeClassText}>CHANGE</Text>
             </Pressable>
           </GlassCard>
+
+          {/* ── ATTENDANCE REMINDER BANNER (AFTER CLASSES END OR PENDING) ── */}
+          {classesEnded && pendingAttendance > 0 && (
+            <Pressable
+              onPress={() => router.push('/mark-attendance' as any)}
+              style={({ pressed }) => [styles.attendanceReminderCard, pressed && { opacity: 0.85 }]}
+            >
+              <View style={styles.reminderLeft}>
+                <View style={styles.reminderIconBox}>
+                  <Ionicons name="notifications" size={16} color="#060A17" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.reminderTitle}>CLASSES ENDED FOR TODAY</Text>
+                  <Text style={styles.reminderSubtitle}>
+                    {pendingAttendance} class{pendingAttendance > 1 ? 'es' : ''} waiting to be marked.
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.reminderActionPill}>
+                <Text style={styles.reminderActionText}>MARK NOW</Text>
+                <Ionicons name="arrow-forward" size={11} color="#060A17" />
+              </View>
+            </Pressable>
+          )}
 
           {/* ── CUSTOM TIMETABLE BANNER WITH UNDO ALL BUTTON ────────── */}
           {hasEdits && (
@@ -547,6 +611,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  attendanceBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(0, 229, 255, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 229, 255, 0.35)',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    position: 'relative',
+  },
+  attendanceText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: GlassColors.cyanBright,
+    letterSpacing: 0.5,
+  },
+  attendanceBadgeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#00E5FF',
+    position: 'absolute',
+    top: 4,
+    right: 4,
+  },
   logoutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -563,6 +654,60 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#FF8A80',
     letterSpacing: 0.5,
+  },
+  attendanceReminderCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(0, 229, 255, 0.12)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 229, 255, 0.4)',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginBottom: 14,
+    width: '100%',
+  },
+  reminderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+    paddingRight: 8,
+  },
+  reminderIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: GlassColors.cyan,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reminderTitle: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: GlassColors.cyanBright,
+    letterSpacing: 0.6,
+  },
+  reminderSubtitle: {
+    fontSize: 12,
+    color: GlassColors.textSecondary,
+    fontWeight: '600',
+    marginTop: 1,
+  },
+  reminderActionPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: GlassColors.cyan,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  reminderActionText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#060A17',
   },
   classInfoCard: {
     flexDirection: 'row',

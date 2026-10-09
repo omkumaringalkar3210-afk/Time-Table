@@ -57,6 +57,9 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="setup" options={{ animation: 'fade' }} />
         <Stack.Screen name="timetable" options={{ animation: 'fade' }} />
+        <Stack.Screen name="attendance" options={{ animation: 'fade' }} />
+        <Stack.Screen name="attendance-setup" options={{ animation: 'fade' }} />
+        <Stack.Screen name="mark-attendance" options={{ animation: 'fade' }} />
       </Stack>
       <Watermark />
     </SafeAreaProvider>
