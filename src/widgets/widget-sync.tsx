@@ -7,6 +7,7 @@ import { TimetableEntry, getSlotStatus } from '@/data/timetable-data';
 import { SmallTimetableWidget } from './SmallTimetableWidget';
 import { BigTimetableWidget } from './BigTimetableWidget';
 import { MiniGridTimetableWidget } from './MiniGridTimetableWidget';
+import { GridTimetableWidget4x6 } from './GridTimetableWidget4x6';
 
 export interface WidgetScheduleData {
   user: UserAccount | null;
@@ -69,7 +70,8 @@ export async function getWidgetScheduleData(): Promise<WidgetScheduleData> {
       user.branchId,
       user.divisionId,
       user.subdivisionId,
-      dayNum
+      dayNum,
+      user.username
     );
 
     const ongoing = slots.find((s) => getSlotStatus(s, now) === 'ongoing') || null;
@@ -136,6 +138,21 @@ export async function syncWidgets(): Promise<void> {
       widgetName: 'MiniGridTimetableWidget',
       renderWidget: () => (
         <MiniGridTimetableWidget
+          slots={data.slots}
+          ongoingSlot={data.ongoing}
+          hasUser={Boolean(data.user)}
+          isSunday={data.isSunday}
+          clockTime={clockTime}
+          clockDate={clockDate}
+          dayName={dayName}
+        />
+      ),
+    });
+
+    await requestWidgetUpdate({
+      widgetName: 'GridTimetableWidget4x6',
+      renderWidget: () => (
+        <GridTimetableWidget4x6
           slots={data.slots}
           ongoingSlot={data.ongoing}
           hasUser={Boolean(data.user)}

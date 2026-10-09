@@ -4,6 +4,7 @@ import { getWidgetScheduleData } from './widget-sync';
 import { SmallTimetableWidget } from './SmallTimetableWidget';
 import { BigTimetableWidget } from './BigTimetableWidget';
 import { MiniGridTimetableWidget } from './MiniGridTimetableWidget';
+import { GridTimetableWidget4x6 } from './GridTimetableWidget4x6';
 
 function getClockStrings(now: Date): { clockTime: string; clockDate: string; dayName: string } {
   const hours24 = now.getHours();
@@ -59,6 +60,18 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps): Promise<
       } else if (widgetInfo.widgetName === 'MiniGridTimetableWidget') {
         renderWidget(
           <MiniGridTimetableWidget
+            slots={data.slots}
+            ongoingSlot={data.ongoing}
+            hasUser={Boolean(data.user)}
+            isSunday={data.isSunday}
+            clockTime={clockTime}
+            clockDate={clockDate}
+            dayName={dayName}
+          />
+        );
+      } else if (widgetInfo.widgetName === 'GridTimetableWidget4x6') {
+        renderWidget(
+          <GridTimetableWidget4x6
             slots={data.slots}
             ongoingSlot={data.ongoing}
             hasUser={Boolean(data.user)}

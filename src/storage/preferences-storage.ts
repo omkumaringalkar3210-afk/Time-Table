@@ -22,9 +22,12 @@ export interface UserAccount {
 // Backward-compatible alias
 export type UserTimetablePrefs = UserAccount;
 
-async function storageGet(key: string): Promise<string | null> {
+export async function storageGet(key: string): Promise<string | null> {
   try {
-    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+    if (Platform.OS === 'web' && window.localStorage) {
       return window.localStorage.getItem(key);
     }
     return await AsyncStorage.getItem(key);
@@ -34,9 +37,12 @@ async function storageGet(key: string): Promise<string | null> {
   }
 }
 
-async function storageSet(key: string, value: string): Promise<void> {
+export async function storageSet(key: string, value: string): Promise<void> {
   try {
-    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    if (Platform.OS === 'web' && window.localStorage) {
       window.localStorage.setItem(key, value);
     } else {
       await AsyncStorage.setItem(key, value);
@@ -46,9 +52,12 @@ async function storageSet(key: string, value: string): Promise<void> {
   }
 }
 
-async function storageRemove(key: string): Promise<void> {
+export async function storageRemove(key: string): Promise<void> {
   try {
-    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    if (Platform.OS === 'web' && window.localStorage) {
       window.localStorage.removeItem(key);
     } else {
       await AsyncStorage.removeItem(key);

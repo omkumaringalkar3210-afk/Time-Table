@@ -10,6 +10,11 @@ import {
   getSlotStatus,
   getTodayLiveSchedule,
 } from '@/data/timetable-data';
+import {
+  initCustomScheduleService,
+  getCustomDaySlots,
+  buildScheduleKey,
+} from '@/services/custom-timetable-service';
 
 export interface BranchOption {
   id: string;
@@ -101,9 +106,9 @@ export const TimetableService = {
   },
 
   /**
-   * Retrieves lectures for a specific day (1=Monday ... 6=Saturday)
+   * Retrieves default (official) lectures for a specific day without user overrides
    */
-  getDayLectures(
+  getDefaultDayLectures(
     branchId: string,
     divisionId: string,
     subdivisionId: string,
@@ -114,14 +119,53 @@ export const TimetableService = {
   },
 
   /**
-   * Computes live lecture status right now
+   * Retrieves lectures for a specific day (1=Monday ... 6=Saturday), incorporating user edits if any
+   */
+  getDayLectures(
+    branchId: string,
+    divisionId: string,
+    subdivisionId: string,
+    dayNum: number,
+    username?: string
+  ): TimetableEntry[] {
+    // Check if user has custom edited slots for this day
+    const scheduleKey = buildScheduleKey(username, branchId, divisionId, subdivisionId);
+    const custom = getCustomDaySlots(scheduleKey, dayNum);
+    if (custom) {
+      return custom.filter((s) => s.type !== 'break');
+    }
+
+    const day = getDaySchedule(branchId, divisionId, subdivisionId, dayNum);
+    return day?.slots.filter((s) => s.type !== 'break') || [];
+  },
+
+  /**
+   * Computes live lecture status right now, with custom overrides applied
    */
   getLiveDashboard(
     branchId: string,
     divisionId: string,
-    subdivisionId: string
+    subdivisionId: string,
+    username?: string
   ) {
-    return getTodayLiveSchedule(branchId, divisionId, subdivisionId);
+    const now = new Date();
+    const dayNum = now.getDay();
+    const effectiveDay = dayNum === 0 ? 1 : dayNum;
+
+    const lectures = this.getDayLectures(
+      branchId,
+      divisionId,
+      subdivisionId,
+      effectiveDay,
+      username
+    );
+    if (!lectures || lectures.length === 0) return { ongoing: null, upcoming: [], ended: [] };
+
+    const ongoing = lectures.find((s) => getSlotStatus(s, now) === 'ongoing') || null;
+    const upcoming = lectures.filter((s) => getSlotStatus(s, now) === 'upcoming');
+    const ended = lectures.filter((s) => getSlotStatus(s, now) === 'ended');
+
+    return { ongoing, upcoming, ended };
   },
 
   /**
@@ -131,3 +175,7 @@ export const TimetableService = {
     return getSlotStatus(slot, currentTime);
   },
 };
+
+// Eager initialization of custom overrides cache
+initCustomScheduleService();
+

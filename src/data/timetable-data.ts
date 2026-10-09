@@ -4040,38 +4040,52 @@ const DIVISION_FACULTY: Record<string, Record<string, string>> = {
   },
 };
 
-// Special Schedule for Saturday (Date: 26/09/2026)
-const SATURDAY_SPECIAL_SCHEDULE: Record<
-  string,
-  { room: string; slots: [string, string, string, string] }
-> = {
-  A: { room: 'A-304', slots: ['BIO', 'CAL', 'CHEM', 'IEE'] },
-  B: { room: 'B-309', slots: ['IEE', 'CAL', 'CHEM', 'BIO'] },
-  C: { room: 'B-216', slots: ['BIO', 'CHEM', 'EM', 'CAL'] },
-  D: { room: 'B-203', slots: ['CHEM', 'CAL', 'EM', 'IEE'] },
-  E: { room: 'B-102', slots: ['CAL', 'ICPDS', 'PHY', 'BEE'] },
-  F: { room: 'B-114', slots: ['ICPDS', 'BEE', 'CAL', 'PHY'] },
-  G: { room: 'B-115', slots: ['ICPDS', 'PHY', 'BEE', 'ICPDS'] },
-  H: { room: 'B-315', slots: ['CHEM', 'ICPDS', 'CAL', 'BEE'] },
-  I: { room: 'B-217', slots: ['DM', 'FCS', 'ISPC', 'ISPC'] },
-  J: { room: 'B-204', slots: ['DM', 'PHY', 'CAL', 'ICPDS'] },
-  K: { room: 'B-207', slots: ['DM', 'PHY', 'CAL', 'ICPDS'] },
-  L: { room: 'B-307', slots: ['ICPDS', 'DM', 'PHY', 'CAL'] },
-  M: { room: 'B-314', slots: ['IEE', 'ICPDS', 'BIO', 'CAL'] },
-  N: { room: 'B-303', slots: ['CAL', 'CHEM', 'ICPDS', 'IEE'] },
+// Special Schedule for Saturday (Date: 10/10/2026)
+type SaturdaySlotDef = string | { subject: string; room?: string };
+
+interface SaturdayDivisionConfig {
+  room?: string;
+  slots: [SaturdaySlotDef, SaturdaySlotDef, SaturdaySlotDef, SaturdaySlotDef];
+}
+
+const SATURDAY_SPECIAL_SCHEDULE: Record<string, SaturdayDivisionConfig> = {
+  A: { room: 'B-304', slots: ['IEE', 'EM', 'CAL', 'BIO'] },
+  B: { room: 'B-309', slots: ['EM', 'IEE', 'CAL', 'BIO'] },
+  C: { room: 'B-216', slots: ['ED', 'ED', 'CAL', 'IEE'] },
+  D: { room: 'B-203', slots: ['IEE', 'CAL', 'ED', 'ED'] },
+  E: { room: 'B-307', slots: ['PHY', 'CAL', 'BEE', 'ICPDS'] },
+  F: { room: 'B-114', slots: ['ICPDS', 'CAL', 'PHY', 'BEE'] },
+  G: { room: 'B-115', slots: ['PHY', 'ICPDS', 'BEE', 'CAL'] },
+  H: { room: 'B-102', slots: ['CHEM', 'BEE', 'CAL', 'ICPDS'] },
+  I: { room: 'B-217', slots: ['DM', 'PEE', 'ISPC', 'ISPC'] },
+  J: { room: 'B-303', slots: ['ICPDS', 'CAL', 'PHY', 'DM'] },
+  K: {
+    slots: [
+      { subject: 'ICPDS', room: 'B-207' },
+      { subject: 'DM', room: 'B-207' },
+      { subject: 'PHY', room: 'B-115' },
+      { subject: 'CAL', room: 'B-115' },
+    ],
+  },
+  L: { room: 'B-315', slots: ['DM', 'ICPDS', 'PHY', 'CAL'] },
+  M: { room: 'B-314', slots: ['CAL', 'CHEM', 'ICPDS', 'IEE'] },
+  N: { room: 'B-204', slots: ['BIO', 'CAL', 'CHEM', 'IEE'] },
 };
 
 function buildSaturdayDaySchedule(divisionId: string): DaySchedule {
   const sat = SATURDAY_SPECIAL_SCHEDULE[divisionId];
   const facultyMap = DIVISION_FACULTY[divisionId] || {};
-  const room = sat?.room || '';
 
-  const createSatSlot = (time: string, subject: string): TimetableEntry => {
+  const createSatSlot = (time: string, slotDef: SaturdaySlotDef): TimetableEntry => {
+    const subject = typeof slotDef === 'string' ? slotDef : slotDef.subject;
+    const room =
+      typeof slotDef === 'object' && slotDef.room ? slotDef.room : sat?.room || '';
     const teacher = facultyMap[subject] || '';
     const teacherShort = teacher
       ? teacher.replace(/^(Dr\.|Mr\.|Ms\.|Prof\.)\s*/i, '').trim()
       : '';
-    return makeSlot(time, subject, room, teacher, teacherShort || teacher, 'lecture');
+    const type: TimetableEntry['type'] = subject === 'ED' ? 'lab' : 'lecture';
+    return makeSlot(time, subject, room, teacher, teacherShort || teacher, type);
   };
 
   const shortRecess = makeSlot('10:30 – 10:45', 'Short Recess', '-', '', '', 'break');
